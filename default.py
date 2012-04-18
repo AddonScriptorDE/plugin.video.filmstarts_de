@@ -6,9 +6,9 @@ pluginhandle = int(sys.argv[1])
 
 def index():
         addDir('Trailer: Aktuell im Kino','http://www.filmstarts.de/trailer/aktuell_im_kino.html?version=1',1,'')
-        addDir('Trailer: Demnächst im Kino','http://www.filmstarts.de/trailer/bald_im_kino.html?version=1',1,'')
+        addDir('Trailer: DemnÃ¤chst im Kino','http://www.filmstarts.de/trailer/bald_im_kino.html?version=1',1,'')
         addDir('Trailer: Archiv','http://www.filmstarts.de/trailer/archiv.html?version=1',1,'')
-        addDir('Filmstarts: Fünf Sterne','http://www.filmstarts.de/videos/shows/funf-sterne',3,'')
+        addDir('Filmstarts: FÃ¼nf Sterne','http://www.filmstarts.de/videos/shows/funf-sterne',3,'')
         addDir('Filmstarts: Fehlerteufel','http://www.filmstarts.de/videos/shows/filmstarts-fehlerteufel',3,'')
         addDir('Meine Lieblings-Filmszene','http://www.filmstarts.de/videos/shows/meine-lieblings-filmszene',3,'')
         addDir('Video-Interviews','http://www.filmstarts.de/trailer/interviews/',4,'')
@@ -99,7 +99,7 @@ def playVideo(url):
 def getUrl(url):
         req = urllib2.Request(url)
         req.add_header('User-Agent', 'Mozilla/5.0 (Windows NT 6.1; rv:11.0) Gecko/20100101 Firefox/11.0')
-        response = urllib2.urlopen(req)
+        response = urllib2.urlopen(req,timeout=5)
         link=response.read()
         response.close()
         return link
