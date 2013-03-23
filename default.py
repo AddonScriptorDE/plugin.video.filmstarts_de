@@ -58,21 +58,21 @@ def listVideos(urlFull):
           for thumb,temp1,temp2,url,title in match:
                 if showAllTrailers=="true":
                   url=url[:url.find("/trailer/")]+"/trailers/"
-                  addDir(title,'http://www.filmstarts.de' + url,"listTrailers",thumb)
+                  addDir(title,'http://www.filmstarts.de' + url,"listTrailers",get_better_thumb(thumb))
                 else:
-                  addLink(title,'http://www.filmstarts.de' + url,"playVideo",thumb)
+                  addLink(title,'http://www.filmstarts.de' + url,"playVideo",get_better_thumb(thumb))
         elif mode=="listVideosMagazin":
           if currentPage==1:
             match=re.compile('<a href="(.+?)">\n<img src="(.+?)" alt="" />\n</a>\n</div>\n<div style="(.+?)">\n<h2 class="(.+?)" style="(.+?)"><b>(.+?)</b> (.+?)</h2><br />\n<span style="(.+?)" class="purehtml fs11">\n(.+?)<a class="btn" href="(.+?)"', re.DOTALL).findall(content)
             for temp0,thumb,temp1,temp2,temp3,temp4,title,temp5,temp6,url in match:
-                  addLink(title,'http://www.filmstarts.de' + url,"playVideo",thumb)
+                  addLink(title,'http://www.filmstarts.de' + url,"playVideo",get_better_thumb(thumb))
           match=re.compile('<img src=\'(.+?)\' alt="(.+?)" title="(.+?)" />\n</span>\n</div>\n<div class="contenzone">\n<div class="titlebar">\n<a href=\'(.+?)\' class="link">\n<span class=\'bold\'><b>(.+?)</b> (.+?)</span>', re.DOTALL).findall(content)
           for thumb,temp1,temp2,url,temp3,title in match:
-                addLink(title,'http://www.filmstarts.de' + url,"playVideo",thumb)
+                addLink(title,'http://www.filmstarts.de' + url,"playVideo",get_better_thumb(thumb))
         elif mode=="listVideosInterview":
           match=re.compile('<img src=\'(.+?)\'(.+?)</span>\n</div>\n<div class="contenzone">\n<div class="titlebar">\n<a(.+?)href=\'(.+?)\'>\n<span class=\'bold\'>\n(.+?)\n</span>(.+?)\n</a>', re.DOTALL).findall(content)
           for thumb,temp1,temp2,url,title1,title2 in match:
-                addLink(title1+title2,'http://www.filmstarts.de' + url,"playVideo",thumb)
+                addLink(title1+title2,'http://www.filmstarts.de' + url,"playVideo",get_better_thumb(thumb))
         elif mode=="listVideosTV":
           spl=content.split('<div class="datablock vpadding10b">')
           for i in range(1,len(spl),1):
@@ -87,7 +87,7 @@ def listVideos(urlFull):
             else:
               match=re.compile("<a href='(.+?)'>\n(.+?)<br />", re.DOTALL).findall(entry)
               title=match[0][1]
-            addLink(title,'http://www.filmstarts.de' + url,"playVideo",thumb)
+            addLink(title,'http://www.filmstarts.de' + url,"playVideo",get_better_thumb(thumb))
         if currentPage<maxPage:
           urlNew=""
           if mode=="listVideosTrailer":
@@ -192,6 +192,16 @@ def getYoutubeUrl(id):
           else:
             url = "plugin://plugin.video.youtube/?path=/root/video&action=play_video&videoid=" + id
           return url
+
+def get_better_thumb(thumb_url):
+          # This image provider does dynamic image modificiation
+          # c -> resize, b -> border, o -> overlay
+          # by removing this parameters we get the original/native thumb
+          thumb_url = '/'.join([
+              p for p in thumb_url.split('/')
+              if not p[0:2] in ('c_', 'b_', 'o_')
+          ])
+          return thumb_url
 
 def getUrl(url):
         req = urllib2.Request(url)
