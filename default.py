@@ -58,56 +58,56 @@ def listVideos(urlFull):
             maxPage = int(match[0][2])
         except:
             pass
-    if mode=="listVideosTrailer":
-      match=re.compile('<img src=\'(.+?)\' alt="(.+?)" title="(.+?)" />\n</span>\n</div>\n<div class="contenzone">\n<div class="titlebar">\n<a class="link" href="(.+?)">\n<span class=\'bold\'>(.+?)</span>', re.DOTALL).findall(content)
-      for thumb,temp1,temp2,url,title in match:
-            if showAllTrailers=="true":
-              url=url[:url.find("/trailer/")]+"/trailers/"
-              addDir(title,'http://www.filmstarts.de' + url,"listTrailers",get_better_thumb(thumb))
+    if mode == "listVideosTrailer":
+        match = re.compile('<img src=\'(.+?)\' alt=".+?" title=".+?" />\n</span>\n</div>\n<div class="contenzone">\n<div class="titlebar">\n<a class="link" href="(.+?)">\n<span class=\'bold\'>(.+?)</span>', re.DOTALL).findall(content)
+        for thumb, url, title in match:
+            if showAllTrailers:
+                url = url[:url.find("/trailer/")]+"/trailers/"
+                addDir(title, baseUrl + url, "listTrailers", get_better_thumb(thumb))
             else:
-              addLink(title,'http://www.filmstarts.de' + url,"playVideo",get_better_thumb(thumb))
-    elif mode=="listVideosMagazin":
-      if currentPage==1:
-        match=re.compile('<a href="(.+?)">\n<img src="(.+?)" alt="" />\n</a>\n</div>\n<div style="(.+?)">\n<h2 class="(.+?)" style="(.+?)"><b>(.+?)</b> (.+?)</h2><br />\n<span style="(.+?)" class="purehtml fs11">\n(.+?)<a class="btn" href="(.+?)"', re.DOTALL).findall(content)
-        for temp0,thumb,temp1,temp2,temp3,temp4,title,temp5,temp6,url in match:
-              addLink(title,'http://www.filmstarts.de' + url,"playVideo",get_better_thumb(thumb))
-      match=re.compile('<img src=\'(.+?)\' alt="(.+?)" title="(.+?)" />\n</span>\n</div>\n<div class="contenzone">\n<div class="titlebar">\n<a href=\'(.+?)\' class="link">\n<span class=\'bold\'><b>(.+?)</b> (.+?)</span>', re.DOTALL).findall(content)
-      for thumb,temp1,temp2,url,temp3,title in match:
-            addLink(title,'http://www.filmstarts.de' + url,"playVideo",get_better_thumb(thumb))
-    elif mode=="listVideosInterview":
-      match=re.compile('<img src=\'(.+?)\'(.+?)</span>\n</div>\n<div class="contenzone">\n<div class="titlebar">\n<a(.+?)href=\'(.+?)\'>\n<span class=\'bold\'>\n(.+?)\n</span>(.+?)\n</a>', re.DOTALL).findall(content)
-      for thumb,temp1,temp2,url,title1,title2 in match:
-            addLink(title1+title2,'http://www.filmstarts.de' + url,"playVideo",get_better_thumb(thumb))
-    elif mode=="listVideosTV":
-      spl=content.split('<div class="datablock vpadding10b">')
-      for i in range(1,len(spl),1):
-        entry=spl[i]
-        match=re.compile("<a href='(.+?)'>", re.DOTALL).findall(entry)
-        url=match[0]
-        match=re.compile("<img src='(.+?)'", re.DOTALL).findall(entry)
-        thumb=match[0]
-        if entry.find("<span class='bold'>")>=0:
-          match=re.compile("<span class='bold'>(.+?)</span>(.+?)<br />", re.DOTALL).findall(entry)
-          title=match[0][0]+' '+match[0][1]
-        else:
-          match=re.compile("<a href='(.+?)'>\n(.+?)<br />", re.DOTALL).findall(entry)
-          title=match[0][1]
-        addLink(title,'http://www.filmstarts.de' + url,"playVideo",get_better_thumb(thumb))
-    if currentPage<maxPage:
-      urlNew=""
-      if mode=="listVideosTrailer":
-        sortNr=urlFull[urlFull.find('sort_order=')+11:]
-        sortNr=sortNr[:sortNr.find('&')]
-        urlNew=urlFull[:urlFull.find('?')]+"?page="+str(currentPage+1)+"&sort_order="+sortNr+"&version=1"
-      elif urlFull.find('?page=')>=0 and (mode=="listVideosMagazin" or mode=="listVideosInterview" or mode=="listVideosTV"):
-        match=re.compile('http://www.filmstarts.de/(.+?)?page=(.+?)', re.DOTALL).findall(urlFull)
-        urlNew='http://www.filmstarts.de/'+match[0][0]+'page='+str(currentPage+1)
-      elif urlFull.find('?page=')==-1 and (mode=="listVideosMagazin" or mode=="listVideosInterview" or mode=="listVideosTV"):
-        urlNew=urlFull + "?page="+str(currentPage+1)
-      addDir(translation(30007)+" ("+str(currentPage+1)+")",urlNew,mode,'')
+                addLink(title, baseUrl + url, "playVideo", get_better_thumb(thumb))
+    elif mode == "listVideosMagazin":
+        if currentPage == 1:
+            match = re.compile('<a href=".+?">\n<img src="(.+?)" alt="" />\n</a>\n</div>\n<div style=".+?">\n<h2 class=".+?" style=".+?"><b>.+?</b> (.+?)</h2><br />\n<span style=".+?" class="purehtml fs11">\n.+?<a class="btn" href="(.+?)"', re.DOTALL).findall(content)
+            for thumb, title, url in match:
+                addSmallThumbLink(title, baseUrl + url, "playVideo", get_better_thumb(thumb))
+        match = re.compile('<img src=\'(.+?)\' alt=".+?" title=".+?" />\n</span>\n</div>\n<div class="contenzone">\n<div class="titlebar">\n<a href=\'(.+?)\' class="link">\n<span class=\'bold\'><b>.+?</b> (.+?)</span>', re.DOTALL).findall(content)
+        for thumb, url, title in match:
+            addSmallThumbLink(title, baseUrl + url, "playVideo", get_better_thumb(thumb))
+    elif mode == "listVideosInterview":
+        match = re.compile('<img src=\'(.+?)\'.+?</span>\n</div>\n<div class="contenzone">\n<div class="titlebar">\n<a.+?href=\'(.+?)\'>\n<span class=\'bold\'>\n(.+?)\n</span>(.+?)\n</a>', re.DOTALL).findall(content)
+        for thumb, url, title1, title2 in match:
+            addSmallThumbLink(title1+title2, baseUrl + url, "playVideo", get_better_thumb(thumb))
+    elif mode == "listVideosTV":
+        spl = content.split('<div class="datablock vpadding10b">')
+        for i in range(1, len(spl), 1):
+            entry = spl[i]
+            match = re.compile("<a href='(.+?)'>", re.DOTALL).findall(entry)
+            url = match[0]
+            match = re.compile("<img src='(.+?)'", re.DOTALL).findall(entry)
+            thumb = match[0]
+            if "<span class='bold'>" in entry:
+                match = re.compile("<span class='bold'>(.+?)</span>(.+?)<br />", re.DOTALL).findall(entry)
+                title = match[0][0]+' '+match[0][1]
+            else:
+                match = re.compile("<a href='(.+?)'>\n(.+?)<br />", re.DOTALL).findall(entry)
+                title = match[0][1]
+            addSmallThumbLink(title, baseUrl + url, "playVideo", get_better_thumb(thumb))
+    if currentPage < maxPage:
+        urlNew = ""
+        if mode == "listVideosTrailer":
+            sortNr = urlFull[urlFull.find('sort_order=')+11:]
+            sortNr = sortNr[:sortNr.find('&')]
+            urlNew = urlFull[:urlFull.find('?')]+"?page="+str(currentPage+1)+"&sort_order="+sortNr+"&version=1"
+        elif '?page=' in urlFull and mode in ["listVideosMagazin", "listVideosInterview", "listVideosTV"]:
+            match = re.compile('http://www.filmstarts.de/(.+?)?page=(.+?)', re.DOTALL).findall(urlFull)
+            urlNew = baseUrl + '/'+match[0][0]+'page='+str(currentPage+1)
+        elif not '?page=' in urlFull and mode in ["listVideosMagazin", "listVideosInterview", "listVideosTV"]:
+            urlNew = urlFull + "?page="+str(currentPage+1)
+        addDir(translation(30007)+" ("+str(currentPage+1)+")", urlNew, mode, '')
     xbmcplugin.endOfDirectory(pluginhandle)
-    if forceViewMode==True:
-      xbmc.executebuiltin('Container.SetViewMode('+viewMode+')')
+    if forceViewMode:
+        xbmc.executebuiltin('Container.SetViewMode('+viewMode+')')
 
 
 def listTrailers(url, fanart):
