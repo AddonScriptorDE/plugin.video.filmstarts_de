@@ -29,3 +29,5 @@
 - Some small improvements
 1.1.1 / 2.1.1
 - Fixed video playback for some trailers
+2.1.2
+- Fixed youtube playback

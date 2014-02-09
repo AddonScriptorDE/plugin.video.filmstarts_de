@@ -9,16 +9,18 @@ import xbmcgui
 import re
 import sys
 
-addon = xbmcaddon.Addon()
+#addon = xbmcaddon.Addon()
+#addonID = addon.getAddonInfo('id')
+addonID = 'plugin.video.filmstarts_de'
+addon = xbmcaddon.Addon(id=addonID)
 socket.setdefaulttimeout(30)
 pluginhandle = int(sys.argv[1])
-addonId = addon.getAddonInfo('id')
 translation = addon.getLocalizedString
 xbox = xbmc.getCondVisibility("System.Platform.xbox")
 showAllTrailers = addon.getSetting("showAllTrailers") == "true"
-forceViewMode = addon.getSetting("forceViewMode") == "true"
+forceView = addon.getSetting("forceView") == "true"
 useCoverAsFanart = addon.getSetting("useCoverAsFanart") == "true"
-viewMode = str(addon.getSetting("viewMode"))
+viewID = str(addon.getSetting("viewID"))
 maxCoverResolution = addon.getSetting("maxCoverResolution")
 baseUrl = "http://www.filmstarts.de"
 
@@ -44,6 +46,7 @@ def showSortDirection(url):
 
 
 def listVideos(urlFull):
+    xbmcplugin.setContent(pluginhandle, "movies")
     content = getUrl(urlFull)
     currentPage = -1
     maxPage = -1
@@ -66,6 +69,8 @@ def listVideos(urlFull):
                 addDir(title, baseUrl + url, "listTrailers", get_better_thumb(thumb))
             else:
                 addLink(title, baseUrl + url, "playVideo", get_better_thumb(thumb))
+        if forceView:
+            xbmc.executebuiltin('Container.SetViewMode('+viewID+')')
     elif mode == "listVideosMagazin":
         if currentPage == 1:
             match = re.compile('<a href=".+?">\n<img src="(.+?)" alt="" />\n</a>\n</div>\n<div style=".+?">\n<h2 class=".+?" style=".+?"><b>.+?</b> (.+?)</h2><br />\n<span style=".+?" class="purehtml fs11">\n.+?<a class="btn" href="(.+?)"', re.DOTALL).findall(content)
@@ -106,8 +111,6 @@ def listVideos(urlFull):
             urlNew = urlFull + "?page="+str(currentPage+1)
         addDir(translation(30007)+" ("+str(currentPage+1)+")", urlNew, mode, '')
     xbmcplugin.endOfDirectory(pluginhandle)
-    if forceViewMode:
-        xbmc.executebuiltin('Container.SetViewMode('+viewMode+')')
 
 
 def listTrailers(url, fanart):
@@ -127,8 +130,6 @@ def listTrailers(url, fanart):
             title = cleanTitle(title)
             addSmallThumbLink(title, url, 'playVideo', get_better_thumb(thumb), fanart)
     xbmcplugin.endOfDirectory(pluginhandle)
-    if forceViewMode:
-        xbmc.executebuiltin('Container.SetViewMode('+viewMode+')')
 
 
 def cleanTitle(title):
@@ -140,6 +141,7 @@ def cleanTitle(title):
 
 
 def search():
+    xbmcplugin.setContent(pluginhandle, "movies")
     keyboard = xbmc.Keyboard('', str(translation(30008)))
     keyboard.doModal()
     if keyboard.isConfirmed() and keyboard.getText():
@@ -158,7 +160,7 @@ def search():
             addDir(title, url, 'listTrailers', get_better_thumb(thumb))
         xbmcplugin.endOfDirectory(pluginhandle)
         if forceViewMode:
-            xbmc.executebuiltin('Container.SetViewMode('+viewMode+')')
+            xbmc.executebuiltin('Container.SetViewMode('+viewID+')')
 
 
 def playVideo(url):
@@ -178,6 +180,8 @@ def playVideo(url):
         finalUrl = ""
         match = re.compile('hd_path="(.+?)"', re.DOTALL).findall(content)
         finalUrl = match[0]
+        if finalUrl.startswith("youtube:"):
+            finalUrl = getYoutubeUrl(finalUrl.split(":")[1])
     if finalUrl:
         listitem = xbmcgui.ListItem(path=finalUrl)
         xbmcplugin.setResolvedUrl(pluginhandle, True, listitem)
@@ -242,7 +246,7 @@ def addLink(name, url, mode, iconimage):
     if useCoverAsFanart:
         liz.setProperty("fanart_image", iconimage)
     liz.setProperty('IsPlayable', 'true')
-    liz.addContextMenuItems([(translation(30011), 'RunPlugin(plugin://'+addonId+'/?mode=queueVideo&url='+urllib.quote_plus(u)+'&name='+urllib.quote_plus(name)+')',)])
+    liz.addContextMenuItems([(translation(30011), 'RunPlugin(plugin://'+addonID+'/?mode=queueVideo&url='+urllib.quote_plus(u)+'&name='+urllib.quote_plus(name)+')',)])
     ok = xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]), url=u, listitem=liz)
     return ok
 
@@ -255,7 +259,7 @@ def addSmallThumbLink(name, url, mode, iconimage, fanart=""):
     liz.setProperty('IsPlayable', 'true')
     if useCoverAsFanart:
         liz.setProperty("fanart_image", fanart)
-    liz.addContextMenuItems([(translation(30011), 'RunPlugin(plugin://'+addonId+'/?mode=queueVideo&url='+urllib.quote_plus(u)+'&name='+urllib.quote_plus(name)+')',)])
+    liz.addContextMenuItems([(translation(30011), 'RunPlugin(plugin://'+addonID+'/?mode=queueVideo&url='+urllib.quote_plus(u)+'&name='+urllib.quote_plus(name)+')',)])
     ok = xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]), url=u, listitem=liz)
     return ok
 
